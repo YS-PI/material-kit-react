@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Input, Slide, Button, IconButton, InputAdornment, ClickAwayListener } from '@mui/material';
@@ -6,6 +7,7 @@ import { Input, Slide, Button, IconButton, InputAdornment, ClickAwayListener } f
 import { bgBlur } from '../../../utils/cssStyles';
 // component
 import Iconify from '../../../components/iconify';
+
 
 // ----------------------------------------------------------------------
 
@@ -34,6 +36,9 @@ const StyledSearchbar = styled('div')(({ theme }) => ({
 
 export default function Searchbar() {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("")
+
+  const navigate = useNavigate()
 
   const handleOpen = () => {
     setOpen(!open);
@@ -42,6 +47,13 @@ export default function Searchbar() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const searchRoute = () => {
+    navigate(`/dashboard/${search}`)
+    handleClose()
+  }
+
+
 
   return (
     <ClickAwayListener onClickAway={handleClose}>
@@ -59,6 +71,8 @@ export default function Searchbar() {
               fullWidth
               disableUnderline
               placeholder="Search…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
               startAdornment={
                 <InputAdornment position="start">
                   <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled', width: 20, height: 20 }} />
@@ -66,7 +80,7 @@ export default function Searchbar() {
               }
               sx={{ mr: 1, fontWeight: 'fontWeightBold' }}
             />
-            <Button variant="contained" onClick={handleClose}>
+            <Button variant="contained" onClick={searchRoute}>
               Search
             </Button>
           </StyledSearchbar>
