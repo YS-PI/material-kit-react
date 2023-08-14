@@ -1,3 +1,4 @@
+import { useSignIn } from '@clerk/clerk-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -6,26 +7,81 @@ import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from '../../../components/iconify';
 
+
 // ----------------------------------------------------------------------
 
 export default function LoginForm() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleClick = () => {
-    navigate('/dashboard', { replace: true });
+  const { isLoaded, signIn, setActive } = useSignIn();
+
+
+
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  const handleClick = async () => {
+    console.log(email, password);
+    setLoading(true)
+    await signIn
+      .create({
+        identifier: email,
+        password,
+      })
+      .then((result) => {
+        if (result.status === "complete") {
+          setLoading(false)
+          console.log(result);
+          setActive({ session: result.createdSessionId });
+          /* navigate('/dashboard', { replace: true }); */
+        }
+        else {
+          console.log(result);
+        }
+      })
+      .catch((err) => {
+        console.error("error", err.errors[0].longMessage)
+        setLoading(false)
+      });
   };
+
+  /* async function submit(e) {
+    e.preventDefault();
+    await signIn
+      .create({
+        identifier: email,
+        password,
+      })
+      .then((result) => {
+        if (result.status === "complete") {
+          console.log(result);
+          setActive({ session: result.createdSessionId });
+        }
+        else {
+          console.log(result);
+        }
+      })
+      .catch((err) => console.error("error", err.errors[0].longMessage));
+  } */
 
   return (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField name="email" label="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
 
         <TextField
           name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -45,7 +101,7 @@ export default function LoginForm() {
         </Link>
       </Stack>
 
-      <LoadingButton fullWidth size="large" type="submit" variant="contained" onClick={handleClick}>
+      <LoadingButton fullWidth size="large" type="button" variant="contained" onClick={handleClick} loading={loading}>
         Login
       </LoadingButton>
     </>

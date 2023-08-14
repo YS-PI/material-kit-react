@@ -1,4 +1,4 @@
-import {  useClerk, useUser } from "@clerk/clerk-react";
+import { useClerk, useUser } from "@clerk/clerk-react";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 // @mui
@@ -31,15 +31,15 @@ export default function AccountPopover() {
   const [open, setOpen] = useState(null);
 
   const { signOut } = useClerk();
-  const {user} = useUser()
+  const { user } = useUser()
   const navigate = useNavigate();
 
 
-console.log(user)
+  console.log(user)
 
-  
 
-  
+
+
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -52,8 +52,7 @@ console.log(user)
   const outSession = () => {
     signOut()
     handleClose()
-    navigate('/login')
-   }
+  }
 
   return (
     <>
