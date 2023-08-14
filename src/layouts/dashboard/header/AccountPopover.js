@@ -1,9 +1,12 @@
+import {  useClerk, useUser } from "@clerk/clerk-react";
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
+
 
 // ----------------------------------------------------------------------
 
@@ -27,6 +30,17 @@ const MENU_OPTIONS = [
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
 
+  const { signOut } = useClerk();
+  const {user} = useUser()
+  const navigate = useNavigate();
+
+
+console.log(user)
+
+  
+
+  
+
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
@@ -34,6 +48,12 @@ export default function AccountPopover() {
   const handleClose = () => {
     setOpen(null);
   };
+
+  const outSession = () => {
+    signOut()
+    handleClose()
+    navigate('/login')
+   }
 
   return (
     <>
@@ -78,7 +98,7 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {user?.username}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {account.email}
@@ -97,7 +117,7 @@ export default function AccountPopover() {
 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
+        <MenuItem onClick={outSession} sx={{ m: 1 }}>
           Logout
         </MenuItem>
       </Popover>

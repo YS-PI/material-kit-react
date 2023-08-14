@@ -1,4 +1,5 @@
-import PropTypes from 'prop-types';
+import { useUser } from '@clerk/clerk-react';
+import PropTypes, { string } from 'prop-types';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 // @mui
@@ -34,8 +35,12 @@ Nav.propTypes = {
   onCloseNav: PropTypes.func,
 };
 
+
 export default function Nav({ openNav, onCloseNav }) {
   const { pathname } = useLocation();
+  const { user } = useUser();
+  console.log(user);
+
 
   const isDesktop = useResponsive('up', 'lg');
 
@@ -60,11 +65,11 @@ export default function Nav({ openNav, onCloseNav }) {
       <Box sx={{ mb: 5, mx: 2.5 }}>
         <Link underline="none">
           <StyledAccount>
-            <Avatar src={account.photoURL} alt="photoURL" />
+            <Avatar src={user?.imageUrl} alt={`${user?.username}`} />
 
             <Box sx={{ ml: 2 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {account.displayName}
+                {user?.firstName || user?.lastName ? `${user?.firstName} ${user?.lastName}` : user?.username}
               </Typography>
 
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -80,7 +85,7 @@ export default function Nav({ openNav, onCloseNav }) {
       <Box sx={{ flexGrow: 1 }} />
 
       <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-        <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
+        {/* <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
           <Box
             component="img"
             src="/assets/illustrations/illustration_avatar.png"
@@ -100,7 +105,7 @@ export default function Nav({ openNav, onCloseNav }) {
           <Button href="https://material-ui.com/store/items/minimal-dashboard/" target="_blank" variant="contained">
             Upgrade to Pro
           </Button>
-        </Stack>
+        </Stack> */}
       </Box>
     </Scrollbar>
   );

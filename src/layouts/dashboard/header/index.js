@@ -1,3 +1,4 @@
+import { UserButton } from '@clerk/clerk-react';
 import PropTypes from 'prop-types';
 // @mui
 import { styled } from '@mui/material/styles';
@@ -11,6 +12,7 @@ import Searchbar from './Searchbar';
 import AccountPopover from './AccountPopover';
 import LanguagePopover from './LanguagePopover';
 import NotificationsPopover from './NotificationsPopover';
+
 
 // ----------------------------------------------------------------------
 
@@ -70,7 +72,8 @@ export default function Header({ onOpenNav }) {
         >
           <LanguagePopover />
           <NotificationsPopover />
-          <AccountPopover />
+          <UserButton/>
+         {/*  <AccountPopover /> */}
         </Stack>
       </StyledToolbar>
     </StyledRoot>
