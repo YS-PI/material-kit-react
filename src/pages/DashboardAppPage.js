@@ -1,5 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { faker } from '@faker-js/faker';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Grid, Container, Typography } from '@mui/material';
@@ -19,11 +21,96 @@ import {
 } from '../sections/@dashboard/app';
 
 
+
+
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
+
+  const [data, setData] = useState([])
+
+  const getData = async () => {
+    const header = {
+      "Content-Type": "application/json",
+    }
+    await axios(`${process.env.REACT_APP_URL}/get_data/total/`, {
+      method: "POST",
+      headers: header,
+      data: JSON.stringify({
+        "semestre": ""
+      })
+    }).then(({ data }) => {
+      setData(data)
+    }).catch((err) => {
+      console.log(err)
+    })
+  }
+
+
+  const dataMonth = [...data].filter(data => data.upload_aws === "1")
+  console.log(dataMonth)
+
+  const dataIncomplete = [...data].filter(data => data.upload_aws === "0")
+  console.log(dataIncomplete)
+
+  const dataPie = [...dataMonth].map(data => {
+    return {
+      label: data.Semestre,
+      value: data.total,
+    }
+  })
+
+  const dataBarr = [...dataIncomplete].map(data => {
+    return {
+      label: data.Semestre,
+      value: data.total,
+    }
+  })
+
+  const dataLabel = [...dataMonth].map(data => {
+    return {
+      label: data.Semestre,
+    }
+  })
+
+  const dataLabelIncomplete = [...dataIncomplete].map(data => {
+    return {
+      label: data.Semestre,
+    }
+  })
+
+  console.log(dataLabelIncomplete)
+
+  const dataTable = [...dataMonth].map(data => data.total)
+  const dataTableIncomplete = [...dataIncomplete].map(data => data.total)
+
+  const newStringLabel = Object.keys(dataLabel).map(key => dataLabel[key].label);
+  const newStringLabelIncomplete = Object.keys(dataTableIncomplete).map(key => dataLabel[key].label);
+
+
+
+
+  const totalSum = dataBarr.reduce((sum, item) => sum + item.value, 0);
+  dataBarr.forEach(item => {
+    item.percentage = ((item.value / totalSum) * 100).toFixed(3);
+  });
+
+  const newDataPie = (dataBarr).map(data => {
+    return {
+      label: data.label,
+      value: parseFloat(data.percentage),
+    }
+  })
+
+
+
+
   const theme = useTheme();
 
+
+  useEffect(() => {
+    getData()
+  }, [])
 
 
   return (
@@ -37,8 +124,18 @@ export default function DashboardAppPage() {
           Hi, Welcome back
         </Typography>
 
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          {
+            data.map((data, index) => (
+              <Grid key={index} item xs={12} sm={6} md={3}>
+                <AppWidgetSummary title={data.mensaje} total={data.total} color={data.upload_aws === "1" ? "info" : "error"} icon={`ant-design:${data.upload_aws === "1" ? "apple-filled" : "bug-filled"}`} />
+              </Grid>
+            ))
+          }
+        </Grid>
+
         <Grid container spacing={3}>
-          <Grid item xs={12} sm={6} md={3}>
+          {/*  <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary title="Weekly Sales" total={714000} icon={'ant-design:android-filled'} />
           </Grid>
 
@@ -52,57 +149,42 @@ export default function DashboardAppPage() {
 
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary title="Bug Reports" total={234} color="error" icon={'ant-design:bug-filled'} />
-          </Grid>
+          </Grid> */}
 
-          <Grid item xs={12} md={6} lg={8}>
+          <Grid item xs={12} md={6} lg={6}>
             <AppWebsiteVisits
-              title="Website Visits"
-              subheader="(+43%) than last year"
-              chartLabels={[
-                '01/01/2003',
-                '02/01/2003',
-                '03/01/2003',
-                '04/01/2003',
-                '05/01/2003',
-                '06/01/2003',
-                '07/01/2003',
-                '08/01/2003',
-                '09/01/2003',
-                '10/01/2003',
-                '11/01/2003',
-              ]}
+              title="Archivos Procesados"
+              subheader=""
+              chartLabels={newStringLabel}
               chartData={[
                 {
                   name: 'Team A',
                   type: 'column',
                   fill: 'solid',
-                  data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30],
+                  data: dataTable,
                 },
                 {
                   name: 'Team B',
                   type: 'area',
                   fill: 'gradient',
-                  data: [44, 55, 41, 67, 22, 43, 21, 41, 56, 27, 43],
+                  data: dataTable,
                 },
                 {
                   name: 'Team C',
                   type: 'line',
                   fill: 'solid',
-                  data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],
+                  data: dataTable,
                 },
               ]}
             />
           </Grid>
 
-          <Grid item xs={12} md={6} lg={4}>
+
+
+          <Grid item xs={12} md={6} lg={6}>
             <AppCurrentVisits
-              title="Current Visits"
-              chartData={[
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
-              ]}
+              title="Archivos Procesados Porcentajes"
+              chartData={dataPie}
               chartColors={[
                 theme.palette.primary.main,
                 theme.palette.info.main,
@@ -112,37 +194,56 @@ export default function DashboardAppPage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={6} lg={8}>
-            <AppConversionRates
-              title="Conversion Rates"
-              subheader="(+43%) than last year"
+          <Grid item xs={12} md={6} lg={6}>
+            <AppWebsiteVisits
+              title="Archivos Incompletos"
+              subheader=""
+              chartLabels={newStringLabelIncomplete}
               chartData={[
-                { label: 'Italy', value: 400 },
-                { label: 'Japan', value: 430 },
-                { label: 'China', value: 448 },
-                { label: 'Canada', value: 470 },
-                { label: 'France', value: 540 },
-                { label: 'Germany', value: 580 },
-                { label: 'South Korea', value: 690 },
-                { label: 'Netherlands', value: 1100 },
-                { label: 'United States', value: 1200 },
-                { label: 'United Kingdom', value: 1380 },
+                {
+                  name: 'Team A',
+                  type: 'column',
+                  fill: 'solid',
+                  data: dataTableIncomplete,
+                },
+                {
+                  name: 'Team B',
+                  type: 'area',
+                  fill: 'gradient',
+                  data: dataTableIncomplete,
+                },
+                {
+                  name: 'Team C',
+                  type: 'line',
+                  fill: 'solid',
+                  data: dataTableIncomplete,
+                },
               ]}
             />
           </Grid>
 
+          <Grid item xs={12} md={6} lg={6}>
+            <AppConversionRates
+              title="Archivos Incompletos Porcentajes"
+              subheader=""
+              chartData={newDataPie}
+            />
+          </Grid>
+
+
+
+          {/* 
           <Grid item xs={12} md={6} lg={4}>
             <AppCurrentSubject
               title="Current Subject"
-              chartLabels={['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math']}
+              chartLabels={newStringLabel}
               chartData={[
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
+                { name: 'Series 1', data: [806565, 50, 30, 40, 100, 20] },
                 { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
               ]}
               chartColors={[...Array(6)].map(() => theme.palette.text.secondary)}
             />
-          </Grid>
+          </Grid> */}
 
           {/* <Grid item xs={12} md={6} lg={8}>
             <AppNewsUpdate
