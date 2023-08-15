@@ -5,7 +5,9 @@ import axios from 'axios';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Grid, Container, Typography } from '@mui/material';
+
 // components
+import { Loading } from '../components/loading/Loading';
 import Iconify from '../components/iconify';
 // sections
 import {
@@ -23,13 +25,16 @@ import {
 
 
 
+
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
 
   const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false)
 
   const getData = async () => {
+    setLoading(true)
     const header = {
       "Content-Type": "application/json",
     }
@@ -41,6 +46,7 @@ export default function DashboardAppPage() {
       })
     }).then(({ data }) => {
       setData(data)
+      setLoading(false)
     }).catch((err) => {
       console.log(err)
     })
@@ -52,6 +58,9 @@ export default function DashboardAppPage() {
 
   const dataIncomplete = [...data].filter(data => data.upload_aws === "0")
   console.log(dataIncomplete)
+
+  const newDataIncomplete = dataIncomplete.map(data => data.Semestre)
+  console.log(newDataIncomplete)
 
   const dataPie = [...dataMonth].map(data => {
     return {
@@ -85,8 +94,6 @@ export default function DashboardAppPage() {
   const dataTableIncomplete = [...dataIncomplete].map(data => data.total)
 
   const newStringLabel = Object.keys(dataLabel).map(key => dataLabel[key].label);
-  const newStringLabelIncomplete = Object.keys(dataTableIncomplete).map(key => dataLabel[key].label);
-
 
 
 
@@ -113,7 +120,7 @@ export default function DashboardAppPage() {
   }, [])
 
 
-  return (
+  return loading ? <Loading /> : (
     <>
       <Helmet>
         <title> Dashboard | Scholar URP </title>
@@ -128,7 +135,7 @@ export default function DashboardAppPage() {
           {
             data.map((data, index) => (
               <Grid key={index} item xs={12} sm={6} md={3}>
-                <AppWidgetSummary title={data.mensaje} total={data.total} color={data.upload_aws === "1" ? "info" : "error"} icon={`ant-design:${data.upload_aws === "1" ? "apple-filled" : "bug-filled"}`} />
+                <AppWidgetSummary title={`ARCHIVOS ${data.mensaje}S - ${data.Semestre}`} total={data.total} color={data.upload_aws === "1" ? "info" : "error"} icon={`ant-design:${data.upload_aws === "1" ? "file-filled" : "bug-filled"}`} />
               </Grid>
             ))
           }
@@ -198,7 +205,7 @@ export default function DashboardAppPage() {
             <AppWebsiteVisits
               title="Archivos Incompletos"
               subheader=""
-              chartLabels={newStringLabelIncomplete}
+              chartLabels={newDataIncomplete}
               chartData={[
                 {
                   name: 'Team A',
