@@ -45,29 +45,39 @@ export default function DashboardAppPage() {
         "semestre": ""
       })
     }).then(({ data }) => {
-      setData(data)
+      setData(data?.lstextensiones)
       setLoading(false)
     }).catch((err) => {
       console.log(err)
     })
   }
 
+  const newData = structuredClone(data)
+  const sumBySemester = {}
 
-  const dataMonth = [...data].filter(data => data.upload_aws === "1")
-  console.log(dataMonth)
+  newData?.forEach(item => {
+    const semestre = item.Semestre;
+    const total = item.total;
 
-  const dataIncomplete = [...data].filter(data => data.upload_aws === "0")
-  console.log(dataIncomplete)
-
-  const newDataIncomplete = dataIncomplete.map(data => data.Semestre)
-  console.log(newDataIncomplete)
-
-  const dataPie = [...dataMonth].map(data => {
-    return {
-      label: data.Semestre,
-      value: data.total,
+    if (sumBySemester[semestre]) {
+      sumBySemester[semestre] += total;
+    } else {
+      sumBySemester[semestre] = total;
     }
-  })
+  });
+
+  const result = Object.keys(sumBySemester).map(semestre => {
+    return { Semestre: semestre, total_sum: sumBySemester[semestre] };
+  });
+
+  const dataMonth = newData?.filter(data => data.upload_aws === "1")
+  const dataIncomplete = newData?.filter(data => data.upload_aws === "0")
+
+  const dataTable = dataMonth?.map(data => data.total)
+  const dataTableIncomplete = dataIncomplete?.map(data => data.total)
+
+  const newStringLabel = [...result].map(key => key.Semestre)
+  const newSDataTotal = [...result].map(key => key.total_sum)
 
   const dataBarr = [...dataIncomplete].map(data => {
     return {
@@ -76,30 +86,21 @@ export default function DashboardAppPage() {
     }
   })
 
-  const dataLabel = [...dataMonth].map(data => {
+  const dataBarrComplete = [...dataMonth].map(data => {
     return {
       label: data.Semestre,
+      value: data.total,
     }
   })
-
-  const dataLabelIncomplete = [...dataIncomplete].map(data => {
-    return {
-      label: data.Semestre,
-    }
-  })
-
-  console.log(dataLabelIncomplete)
-
-  const dataTable = [...dataMonth].map(data => data.total)
-  const dataTableIncomplete = [...dataIncomplete].map(data => data.total)
-
-  const newStringLabel = Object.keys(dataLabel).map(key => dataLabel[key].label);
-
-
 
   const totalSum = dataBarr.reduce((sum, item) => sum + item.value, 0);
   dataBarr.forEach(item => {
     item.percentage = ((item.value / totalSum) * 100).toFixed(3);
+  });
+
+  const totalSumComplete = dataBarrComplete.reduce((sum, item) => sum + item.value, 0);
+  dataBarrComplete.forEach(item => {
+    item.percentage = ((item.value / totalSumComplete) * 100).toFixed(3);
   });
 
   const newDataPie = (dataBarr).map(data => {
@@ -109,8 +110,14 @@ export default function DashboardAppPage() {
     }
   })
 
+  const newDataPieBarr = (dataBarrComplete).map(data => {
+    return {
+      label: data.label,
+      value: parseFloat(data.percentage),
+    }
+  })
 
-
+  console.log(newData)
 
   const theme = useTheme();
 
@@ -131,7 +138,7 @@ export default function DashboardAppPage() {
           Hi, Welcome back
         </Typography>
 
-        <Grid container spacing={3} sx={{ mb: 3 }}>
+        {/*  <Grid container spacing={3} sx={{ mb: 3 }}>
           {
             data.map((data, index) => (
               <Grid key={index} item xs={12} sm={6} md={3}>
@@ -139,7 +146,7 @@ export default function DashboardAppPage() {
               </Grid>
             ))
           }
-        </Grid>
+        </Grid> */}
 
         <Grid container spacing={3}>
           {/*  <Grid item xs={12} sm={6} md={3}>
@@ -158,29 +165,29 @@ export default function DashboardAppPage() {
             <AppWidgetSummary title="Bug Reports" total={234} color="error" icon={'ant-design:bug-filled'} />
           </Grid> */}
 
-          <Grid item xs={12} md={6} lg={6}>
+          <Grid item xs={12} md={12} lg={12}>
             <AppWebsiteVisits
-              title="Archivos Procesados"
+              title="Subida de archivos"
               subheader=""
               chartLabels={newStringLabel}
               chartData={[
                 {
-                  name: 'Team A',
+                  name: 'Archivos Procesados',
                   type: 'column',
                   fill: 'solid',
                   data: dataTable,
                 },
                 {
-                  name: 'Team B',
-                  type: 'area',
-                  fill: 'gradient',
-                  data: dataTable,
+                  name: 'Archivos Incompletos',
+                  type: 'column',
+                  fill: 'solid',
+                  data: dataTableIncomplete,
                 },
                 {
-                  name: 'Team C',
-                  type: 'line',
+                  name: 'Archivos Totales',
+                  type: 'column',
                   fill: 'solid',
-                  data: dataTable,
+                  data: newSDataTotal,
                 },
               ]}
             />
@@ -188,7 +195,76 @@ export default function DashboardAppPage() {
 
 
 
+          <Grid item xs={12} md={6} lg={4}>
+            <AppWebsiteVisits
+              title="Archivos Procesados"
+              subheader=""
+              chartLabels={newStringLabel}
+              chartData={[
+                {
+                  name: 'Archivos Procesados',
+                  type: 'column',
+                  fill: 'solid',
+                  data: dataTable,
+                },
+
+              ]}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6} lg={4}>
+            <AppWebsiteVisits
+              title="Archivos Incompletos"
+              subheader=""
+              chartLabels={newStringLabel}
+              chartData={[
+                {
+                  name: 'Archivos Totales',
+                  type: 'column',
+                  fill: 'solid',
+                  data: dataTableIncomplete,
+                },
+
+              ]}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6} lg={4}>
+            <AppWebsiteVisits
+              title="Archivos Totales"
+              subheader=""
+              chartLabels={newStringLabel}
+              chartData={[
+                {
+                  name: 'Archivos Totales',
+                  type: 'column',
+                  fill: 'solid',
+                  data: newSDataTotal,
+                },
+
+              ]}
+            />
+          </Grid>
+
+
+
           <Grid item xs={12} md={6} lg={6}>
+            <AppConversionRates
+              title="Archivos Subidos Porcentajes"
+              subheader=""
+              chartData={newDataPieBarr}
+            />
+          </Grid>
+
+          <Grid item xs={12} md={6} lg={6}>
+            <AppConversionRates
+              title="Archivos Incompletos Porcentajes"
+              subheader=""
+              chartData={newDataPie}
+            />
+          </Grid>
+
+          {/* <Grid item xs={12} md={6} lg={6}>
             <AppCurrentVisits
               title="Archivos Procesados Porcentajes"
               chartData={dataPie}
@@ -201,41 +277,9 @@ export default function DashboardAppPage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={6} lg={6}>
-            <AppWebsiteVisits
-              title="Archivos Incompletos"
-              subheader=""
-              chartLabels={newDataIncomplete}
-              chartData={[
-                {
-                  name: 'Team A',
-                  type: 'column',
-                  fill: 'solid',
-                  data: dataTableIncomplete,
-                },
-                {
-                  name: 'Team B',
-                  type: 'area',
-                  fill: 'gradient',
-                  data: dataTableIncomplete,
-                },
-                {
-                  name: 'Team C',
-                  type: 'line',
-                  fill: 'solid',
-                  data: dataTableIncomplete,
-                },
-              ]}
-            />
-          </Grid>
 
-          <Grid item xs={12} md={6} lg={6}>
-            <AppConversionRates
-              title="Archivos Incompletos Porcentajes"
-              subheader=""
-              chartData={newDataPie}
-            />
-          </Grid>
+
+           */}
 
 
 
