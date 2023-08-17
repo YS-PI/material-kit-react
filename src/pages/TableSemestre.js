@@ -7,7 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Card, Toolbar, Typography, Autocomplete, TextField } from '@mui/material';
+import { Card, Toolbar, Typography, Autocomplete, TextField, TablePagination } from '@mui/material';
 import Scrollbar from '../components/scrollbar';
 import Label from '../components/label/Label';
 
@@ -19,6 +19,18 @@ import Label from '../components/label/Label';
 export default function TableSemestre({ newData }) {
 
   const [labelSemestre, setLabelSemestre] = useState("")
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(6);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
 
   const labels = (structuredClone(newData).map(data => data.Semestre))
   const options = new Set(labels)
@@ -35,7 +47,7 @@ export default function TableSemestre({ newData }) {
 
 
 
-  const filterSemestre = labelSemestre !== null && labelSemestre.length > 0 ? newData.filter(data => {
+  const filterSemestre = labelSemestre !== null && labelSemestre?.length > 0 ? newData.filter(data => {
     return data?.Semestre === labelSemestre
   }
   ) : newData
@@ -76,7 +88,7 @@ export default function TableSemestre({ newData }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filterSemestre.map((row, index) => (
+                {filterSemestre.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                   <TableRow
                     key={index}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -92,6 +104,15 @@ export default function TableSemestre({ newData }) {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[6, 10, 25]}
+            component="div"
+            count={filterSemestre.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Scrollbar>
       </Card>
     </>

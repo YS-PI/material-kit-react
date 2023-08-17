@@ -23,6 +23,7 @@ import {
 } from '../sections/@dashboard/app';
 import Page404 from './Page404';
 import TableSemestre from './TableSemestre';
+import TableTypes from './TableTypes';
 
 
 
@@ -33,6 +34,7 @@ import TableSemestre from './TableSemestre';
 export default function DashboardAppPage() {
 
   const [data, setData] = useState([])
+  const [extension, setExtension] = useState([])
   const [loading, setLoading] = useState(false)
   const [handleError, setHandleError] = useState(false)
 
@@ -53,6 +55,23 @@ export default function DashboardAppPage() {
     }).catch((err) => {
       console.log(err)
       setLoading(false)
+      setHandleError(true)
+    })
+  }
+
+  const getExtension = async () => {
+    const header = {
+      "Content-Type": "application/json",
+    }
+    await axios(`${process.env.REACT_APP_URL}/get_data/extensiones/`, {
+      method: "POST",
+      headers: header,
+      data: JSON.stringify({
+        "semestre": ""
+      })
+    }).then(({ data }) => {
+      setExtension(data?.lstextensiones)
+    }).catch((err) => {
       setHandleError(true)
     })
   }
@@ -155,6 +174,8 @@ export default function DashboardAppPage() {
 
   useEffect(() => {
     getData()
+    getExtension()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
@@ -295,8 +316,12 @@ export default function DashboardAppPage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={12} lg={12}>
+          <Grid item xs={12} md={12} lg={6}>
             <TableSemestre newData={newData} />
+          </Grid>
+
+          <Grid item xs={12} md={12} lg={6}>
+            <TableTypes extension={extension} />
           </Grid>
 
           {/* <Grid item xs={12} md={6} lg={6}>
