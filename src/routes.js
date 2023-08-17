@@ -10,17 +10,17 @@ import LoginPage from './pages/LoginPage';
 import Page404 from './pages/Page404';
 import ProductsPage from './pages/ProductsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
-
+import Repositorio from './pages/Repositorio';
 
 // ----------------------------------------------------------------------
 
 export const ContainerLogin = ({ children }) => {
   return (
-    <div style={{ display: "flex", justifyContent: "center", minHeight: "100vh", alignItems: "center" }}>
+    <div style={{ display: 'flex', justifyContent: 'center', minHeight: '100vh', alignItems: 'center' }}>
       {children}
     </div>
-  )
-}
+  );
+};
 
 export const ProtectedLogin = ({ children }) => {
   const { user } = useUser();
@@ -30,8 +30,7 @@ export const ProtectedLogin = ({ children }) => {
   }
 
   return children;
-
-}
+};
 
 export const ProtectRoute = ({ children }) => {
   const { user } = useUser();
@@ -41,23 +40,26 @@ export const ProtectRoute = ({ children }) => {
   }
 
   return <Navigate to="/login" replace />;
-
-}
+};
 
 export default function Router() {
-
-
   const routes = useRoutes([
     {
       path: '/dashboard',
-      element:
-        <ProtectRoute><SignedIn > <DashboardLayout /></SignedIn></ProtectRoute>,
+      element: (
+        <ProtectRoute>
+          <SignedIn>
+            {' '}
+            <DashboardLayout />
+          </SignedIn>
+        </ProtectRoute>
+      ),
       children: [
         { element: <Navigate to="/dashboard/app" />, index: true },
         { path: 'app', element: <DashboardAppPage /> },
         { path: 'user', element: <UserPage /> },
         { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
+        { path: 'repositorio', element: <Repositorio /> },
       ],
     },
     /* {
@@ -66,7 +68,11 @@ export default function Router() {
     }, */
     {
       path: '/login',
-      element: <ProtectedLogin><LoginPage /></ProtectedLogin>,
+      element: (
+        <ProtectedLogin>
+          <LoginPage />
+        </ProtectedLogin>
+      ),
     },
     /* {
       element: <SignedIn><SimpleLayout /></SignedIn>,
