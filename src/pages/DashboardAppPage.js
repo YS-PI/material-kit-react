@@ -316,11 +316,11 @@ export default function DashboardAppPage() {
             />
           </Grid>
 
-          <Grid item xs={12} md={12} lg={6}>
+          <Grid item xs={12} md={12} lg={12} xl={6}>
             <TableSemestre newData={newData} />
           </Grid>
 
-          <Grid item xs={12} md={12} lg={6}>
+          <Grid item xs={12} md={12} lg={12} xl={6}>
             <TableTypes extension={extension} />
           </Grid>
 
