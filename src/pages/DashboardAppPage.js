@@ -21,6 +21,8 @@ import {
   AppCurrentSubject,
   AppConversionRates,
 } from '../sections/@dashboard/app';
+import Page404 from './Page404';
+import TableSemestre from './TableSemestre';
 
 
 
@@ -32,6 +34,7 @@ export default function DashboardAppPage() {
 
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
+  const [handleError, setHandleError] = useState(false)
 
   const getData = async () => {
     setLoading(true)
@@ -49,10 +52,38 @@ export default function DashboardAppPage() {
       setLoading(false)
     }).catch((err) => {
       console.log(err)
+      setLoading(false)
+      setHandleError(true)
     })
   }
 
   const newData = structuredClone(data)
+  const semestresWithUpload1 = new Set();
+  // Identificar los semestres que ya tienen "upload_aws": "1"
+  newData.forEach(entry => {
+    if (entry.upload_aws === "1") {
+      semestresWithUpload1.add(entry.Semestre);
+    }
+  });
+
+  // Agregar entradas para los semestres que tienen "upload_aws": "1" pero no "upload_aws": "0"
+  semestresWithUpload1.forEach(semestre => {
+    const hasUpload0 = newData.some(entry => entry.Semestre === semestre && entry.upload_aws === "0");
+
+    if (!hasUpload0) {
+      newData.push({
+        "Semestre": semestre,
+        "upload_aws": "0",
+        "total": 0,
+        "Size": "0",
+        "mensaje": "INCOMPLETO"
+      });
+    }
+  });
+
+  (newData.sort((a, b) => (a.Semestre > b.Semestre) ? 1 : -1));
+
+
   const sumBySemester = {}
 
   newData?.forEach(item => {
@@ -127,7 +158,7 @@ export default function DashboardAppPage() {
   }, [])
 
 
-  return loading ? <Loading /> : (
+  return handleError ? <Page404 /> : loading ? <Loading /> : (
     <>
       <Helmet>
         <title> Dashboard | Scholar URP </title>
@@ -184,7 +215,7 @@ export default function DashboardAppPage() {
                   data: dataTableIncomplete,
                 },
                 {
-                  name: 'Archivos Totales',
+                  name: 'Total Moodle',
                   type: 'column',
                   fill: 'solid',
                   data: newSDataTotal,
@@ -236,7 +267,7 @@ export default function DashboardAppPage() {
               chartLabels={newStringLabel}
               chartData={[
                 {
-                  name: 'Archivos Totales',
+                  name: 'Total Moodle',
                   type: 'column',
                   fill: 'solid',
                   data: newSDataTotal,
@@ -262,6 +293,10 @@ export default function DashboardAppPage() {
               subheader=""
               chartData={newDataPie}
             />
+          </Grid>
+
+          <Grid item xs={12} md={12} lg={12}>
+            <TableSemestre newData={newData} />
           </Grid>
 
           {/* <Grid item xs={12} md={6} lg={6}>
