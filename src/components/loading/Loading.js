@@ -2,7 +2,6 @@ import "../../styles/loading.css"
 
 export const Loading = () => {
     return (
-
         <div className="socket">
             <div className="gel center-gel">
                 <div className="hex-brick h1" />
