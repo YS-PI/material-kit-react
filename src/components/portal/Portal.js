@@ -7,16 +7,19 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import axios from 'axios';
 import TablePortal from './TablePortal';
+import { Loading } from '../loading/Loading';
 
 export default function Portal({ openPortal, setOpenPortal, warningData }) {
   const [detail, setDetail] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const handleClose = () => {
     setOpenPortal(false);
   };
 
   const getDetail = async () => {
-    const { data } = await axios(`${process.env.REACT_APP_URL}/get_data/detalle/`, {
+    setLoading(true);
+    await axios(`${process.env.REACT_APP_URL}/get_data/detalle/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,12 +28,19 @@ export default function Portal({ openPortal, setOpenPortal, warningData }) {
         semestre: warningData?.Semestre,
         estado: warningData?.upload_aws,
       }),
-    });
-
-    setDetail(data);
+    })
+      .then(({ data }) => {
+        setDetail(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
   };
 
   console.log(warningData);
+  console.log(loading);
 
   useEffect(() => {
     getDetail();
@@ -48,8 +58,8 @@ export default function Portal({ openPortal, setOpenPortal, warningData }) {
         fullWidth={Boolean(true)}
       >
         <DialogTitle id="alert-dialog-title">{`Semestre ${warningData?.Semestre}`}</DialogTitle>
-        <DialogContent>
-          <TablePortal detail={detail} />
+        <DialogContent sx={loading ? { position: 'relative', height: '400px' } : null}>
+          {loading ? <Loading /> : <TablePortal detail={detail} />}
         </DialogContent>
         <DialogActions>
           <Button variant="contained" color="error" onClick={handleClose}>
