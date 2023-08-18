@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { faker } from '@faker-js/faker';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 // @mui
 import { useTheme } from '@mui/material/styles';
@@ -24,88 +24,42 @@ import {
 import Page404 from './Page404';
 import TableSemestre from './TableSemestre';
 import TableTypes from './TableTypes';
-
-
-
-
+import ApiContext from '../context/ApiProvider';
 
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
+  const { data, extension, loading, handleError } = useContext(ApiContext);
 
-  const [data, setData] = useState([])
-  const [extension, setExtension] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [handleError, setHandleError] = useState(false)
-
-  const getData = async () => {
-    setLoading(true)
-    const header = {
-      "Content-Type": "application/json",
-    }
-    await axios(`${process.env.REACT_APP_URL}/get_data/total/`, {
-      method: "POST",
-      headers: header,
-      data: JSON.stringify({
-        "semestre": ""
-      })
-    }).then(({ data }) => {
-      setData(data?.lstextensiones)
-      setLoading(false)
-    }).catch((err) => {
-      console.log(err)
-      setLoading(false)
-      setHandleError(true)
-    })
-  }
-
-  const getExtension = async () => {
-    const header = {
-      "Content-Type": "application/json",
-    }
-    await axios(`${process.env.REACT_APP_URL}/get_data/extensiones/`, {
-      method: "POST",
-      headers: header,
-      data: JSON.stringify({
-        "semestre": ""
-      })
-    }).then(({ data }) => {
-      setExtension(data?.lstextensiones)
-    }).catch((err) => {
-      setHandleError(true)
-    })
-  }
-
-  const newData = structuredClone(data)
+  const newData = structuredClone(data);
   const semestresWithUpload1 = new Set();
   // Identificar los semestres que ya tienen "upload_aws": "1"
-  newData.forEach(entry => {
-    if (entry.upload_aws === "1") {
+  newData.forEach((entry) => {
+    if (entry.upload_aws === '1') {
       semestresWithUpload1.add(entry.Semestre);
     }
   });
 
   // Agregar entradas para los semestres que tienen "upload_aws": "1" pero no "upload_aws": "0"
-  semestresWithUpload1.forEach(semestre => {
-    const hasUpload0 = newData.some(entry => entry.Semestre === semestre && entry.upload_aws === "0");
+  semestresWithUpload1.forEach((semestre) => {
+    const hasUpload0 = newData.some((entry) => entry.Semestre === semestre && entry.upload_aws === '0');
 
     if (!hasUpload0) {
       newData.push({
-        "Semestre": semestre,
-        "upload_aws": "0",
-        "total": 0,
-        "Size": "0",
-        "mensaje": "INCOMPLETO"
+        Semestre: semestre,
+        upload_aws: '0',
+        total: 0,
+        Size: '0',
+        mensaje: 'INCOMPLETO',
       });
     }
   });
 
-  (newData.sort((a, b) => (a.Semestre > b.Semestre) ? 1 : -1));
+  newData.sort((a, b) => (a.Semestre > b.Semestre ? 1 : -1));
 
+  const sumBySemester = {};
 
-  const sumBySemester = {}
-
-  newData?.forEach(item => {
+  newData?.forEach((item) => {
     const semestre = item.Semestre;
     const total = item.total;
 
@@ -116,70 +70,66 @@ export default function DashboardAppPage() {
     }
   });
 
-  const result = Object.keys(sumBySemester).map(semestre => {
+  const result = Object.keys(sumBySemester).map((semestre) => {
     return { Semestre: semestre, total_sum: sumBySemester[semestre] };
   });
 
-  const dataMonth = newData?.filter(data => data.upload_aws === "1")
-  const dataIncomplete = newData?.filter(data => data.upload_aws === "0")
+  const dataMonth = newData?.filter((data) => data.upload_aws === '1');
+  const dataIncomplete = newData?.filter((data) => data.upload_aws === '0');
 
-  const dataTable = dataMonth?.map(data => data.total)
-  const dataTableIncomplete = dataIncomplete?.map(data => data.total)
+  const dataTable = dataMonth?.map((data) => data.total);
+  const dataTableIncomplete = dataIncomplete?.map((data) => data.total);
 
-  const newStringLabel = [...result].map(key => key.Semestre)
-  const newSDataTotal = [...result].map(key => key.total_sum)
+  const newStringLabel = [...result].map((key) => key.Semestre);
+  const newSDataTotal = [...result].map((key) => key.total_sum);
 
-  const dataBarr = [...dataIncomplete].map(data => {
+  const dataBarr = [...dataIncomplete].map((data) => {
     return {
       label: data.Semestre,
       value: data.total,
-    }
-  })
+    };
+  });
 
-  const dataBarrComplete = [...dataMonth].map(data => {
+  const dataBarrComplete = [...dataMonth].map((data) => {
     return {
       label: data.Semestre,
       value: data.total,
-    }
-  })
+    };
+  });
 
   const totalSum = dataBarr.reduce((sum, item) => sum + item.value, 0);
-  dataBarr.forEach(item => {
+  dataBarr.forEach((item) => {
     item.percentage = ((item.value / totalSum) * 100).toFixed(3);
   });
 
   const totalSumComplete = dataBarrComplete.reduce((sum, item) => sum + item.value, 0);
-  dataBarrComplete.forEach(item => {
+  dataBarrComplete.forEach((item) => {
     item.percentage = ((item.value / totalSumComplete) * 100).toFixed(3);
   });
 
-  const newDataPie = (dataBarr).map(data => {
+  const newDataPie = dataBarr.map((data) => {
     return {
       label: data.label,
       value: parseFloat(data.percentage),
-    }
-  })
+    };
+  });
 
-  const newDataPieBarr = (dataBarrComplete).map(data => {
+  const newDataPieBarr = dataBarrComplete.map((data) => {
     return {
       label: data.label,
       value: parseFloat(data.percentage),
-    }
-  })
+    };
+  });
 
-  console.log(newData)
+  console.log(newData);
 
   const theme = useTheme();
 
-
-  useEffect(() => {
-    getData()
-    getExtension()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-
-  return handleError ? <Page404 /> : loading ? <Loading /> : (
+  return handleError ? (
+    <Page404 />
+  ) : loading ? (
+    <Loading />
+  ) : (
     <>
       <Helmet>
         <title> Dashboard | Scholar URP </title>
@@ -245,8 +195,6 @@ export default function DashboardAppPage() {
             />
           </Grid>
 
-
-
           <Grid item xs={12} md={6} lg={4}>
             <AppWebsiteVisits
               title="Archivos Procesados"
@@ -259,7 +207,6 @@ export default function DashboardAppPage() {
                   fill: 'solid',
                   data: dataTable,
                 },
-
               ]}
             />
           </Grid>
@@ -276,7 +223,6 @@ export default function DashboardAppPage() {
                   fill: 'solid',
                   data: dataTableIncomplete,
                 },
-
               ]}
             />
           </Grid>
@@ -293,27 +239,16 @@ export default function DashboardAppPage() {
                   fill: 'solid',
                   data: newSDataTotal,
                 },
-
               ]}
             />
           </Grid>
 
-
-
           <Grid item xs={12} md={6} lg={6}>
-            <AppConversionRates
-              title="Archivos Subidos Porcentajes"
-              subheader=""
-              chartData={newDataPieBarr}
-            />
+            <AppConversionRates title="Archivos Subidos Porcentajes" subheader="" chartData={newDataPieBarr} />
           </Grid>
 
           <Grid item xs={12} md={6} lg={6}>
-            <AppConversionRates
-              title="Archivos Incompletos Porcentajes"
-              subheader=""
-              chartData={newDataPie}
-            />
+            <AppConversionRates title="Archivos Incompletos Porcentajes" subheader="" chartData={newDataPie} />
           </Grid>
 
           <Grid item xs={12} md={12} lg={12} xl={6}>
@@ -340,8 +275,6 @@ export default function DashboardAppPage() {
 
 
            */}
-
-
 
           {/* 
           <Grid item xs={12} md={6} lg={4}>
