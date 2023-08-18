@@ -30,16 +30,16 @@ const POST_TITLES = [
 ];
 
 const posts = [...Array(23)].map((_, index) => ({
-  id: faker.datatype.uuid(),
+  id: faker.string.uuid(),
   cover: `/assets/images/covers/cover_${index + 1}.jpg`,
   title: POST_TITLES[index + 1],
   createdAt: faker.date.past(),
-  view: faker.datatype.number(),
-  comment: faker.datatype.number(),
-  share: faker.datatype.number(),
-  favorite: faker.datatype.number(),
+  view: faker.number.int(),
+  comment: faker.number.int(),
+  share: faker.number.int(),
+  favorite: faker.number.int(),
   author: {
-    name: faker.name.fullName(),
+    name: faker.person.fullName(),
     avatarUrl: `/assets/images/avatars/avatar_${index + 1}.jpg`,
   },
 }));

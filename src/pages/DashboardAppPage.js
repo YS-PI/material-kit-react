@@ -121,8 +121,6 @@ export default function DashboardAppPage() {
     };
   });
 
-  console.log(newData);
-
   const theme = useTheme();
 
   return handleError ? (

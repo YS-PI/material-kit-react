@@ -40,8 +40,6 @@ export default function TableSemestre({ newData }) {
     return `${parseFloat(size).toFixed(1)} MB`;
   };
 
-  console.log(labelSemestre);
-
   const filterSemestre =
     labelSemestre !== null && labelSemestre?.length > 0
       ? newData.filter((data) => {

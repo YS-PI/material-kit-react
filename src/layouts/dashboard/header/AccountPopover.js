@@ -1,12 +1,10 @@
-import { useClerk, useUser } from "@clerk/clerk-react";
+import { useClerk, useUser } from '@clerk/clerk-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 // @mui
 import { alpha } from '@mui/material/styles';
 import { Box, Divider, Typography, Stack, MenuItem, Avatar, IconButton, Popover } from '@mui/material';
 // mocks_
 import account from '../../../_mock/account';
-
 
 // ----------------------------------------------------------------------
 
@@ -31,15 +29,7 @@ export default function AccountPopover() {
   const [open, setOpen] = useState(null);
 
   const { signOut } = useClerk();
-  const { user } = useUser()
-  const navigate = useNavigate();
-
-
-  console.log(user)
-
-
-
-
+  const { user } = useUser();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -50,9 +40,9 @@ export default function AccountPopover() {
   };
 
   const outSession = () => {
-    signOut()
-    handleClose()
-  }
+    signOut();
+    handleClose();
+  };
 
   return (
     <>
