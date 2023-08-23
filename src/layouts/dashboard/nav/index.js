@@ -2,6 +2,7 @@ import { useUser } from '@clerk/clerk-react';
 import PropTypes, { string } from 'prop-types';
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+
 // @mui
 import { styled, alpha } from '@mui/material/styles';
 import { Box, Link, Button, Drawer, Typography, Avatar, Stack } from '@mui/material';

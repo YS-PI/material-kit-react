@@ -126,7 +126,9 @@ export default function DashboardAppPage() {
   return handleError ? (
     <Page404 />
   ) : loading ? (
-    <Loading />
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+      <Loading />
+    </div>
   ) : (
     <>
       <Helmet>

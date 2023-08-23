@@ -59,7 +59,13 @@ export default function Portal({ openPortal, setOpenPortal, warningData }) {
       >
         <DialogTitle id="alert-dialog-title">{`Semestre ${warningData?.Semestre}`}</DialogTitle>
         <DialogContent sx={loading ? { position: 'relative', height: '400px' } : null}>
-          {loading ? <Loading /> : <TablePortal detail={detail} />}
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <Loading />
+            </div>
+          ) : (
+            <TablePortal detail={detail} />
+          )}
         </DialogContent>
         <DialogActions>
           <Button variant="contained" color="error" onClick={handleClose}>
