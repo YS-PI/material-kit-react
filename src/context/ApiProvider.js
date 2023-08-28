@@ -6,6 +6,7 @@ const ApiContext = createContext();
 const ApiProvider = ({ children }) => {
   const [data, setData] = useState([]);
   const [extension, setExtension] = useState([]);
+  const [dataBase, setDataBase] = useState([]);
   const [loading, setLoading] = useState(false);
   const [handleError, setHandleError] = useState(false);
 
@@ -52,12 +53,35 @@ const ApiProvider = ({ children }) => {
       });
   };
 
+  const getDataBase = async () => {
+    const header = {
+      'Content-Type': 'application/json',
+    };
+    await axios(`${process.env.REACT_APP_URL}/get_data/sizedb/`, {
+      method: 'POST',
+      headers: header,
+      data: JSON.stringify({
+        semestre: '',
+      }),
+    })
+      .then(({ data }) => {
+        setDataBase(data?.value);
+      })
+      .catch((err) => {
+        setHandleError(true);
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
     getData();
     getExtension();
+    getDataBase();
   }, []);
 
-  return <ApiContext.Provider value={{ data, extension, loading, handleError }}>{children}</ApiContext.Provider>;
+  return (
+    <ApiContext.Provider value={{ data, extension, dataBase, loading, handleError }}>{children}</ApiContext.Provider>
+  );
 };
 
 export { ApiProvider };
