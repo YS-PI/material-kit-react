@@ -7,48 +7,43 @@ import { LoadingButton } from '@mui/lab';
 // components
 import Iconify from '../../../components/iconify';
 
-
 // ----------------------------------------------------------------------
 
-export default function LoginForm() {
+export default function LoginForm({ setHandleError, openSnack }) {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { isLoaded, signIn, setActive } = useSignIn();
-
-
-
 
   if (!isLoaded) {
     return null;
   }
 
   const handleClick = async () => {
-    console.log(email, password);
-    setLoading(true)
+    setLoading(true);
     await signIn
       .create({
         identifier: email,
         password,
       })
       .then((result) => {
-        if (result.status === "complete") {
-          setLoading(false)
+        if (result.status === 'complete') {
+          setLoading(false);
           console.log(result);
           setActive({ session: result.createdSessionId });
           /* navigate('/dashboard', { replace: true }); */
-        }
-        else {
+        } else {
           console.log(result);
         }
       })
       .catch((err) => {
-        console.error("error", err.errors[0].longMessage)
-        setLoading(false)
+        setHandleError(err.errors);
+        openSnack();
+        setLoading(false);
       });
   };
 

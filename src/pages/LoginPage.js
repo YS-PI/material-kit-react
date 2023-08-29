@@ -1,7 +1,11 @@
 import { Helmet } from 'react-helmet-async';
+import React, { useEffect, useState } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Link, Container, Typography, Divider, Stack, Button } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+
 // hooks
 import useResponsive from '../hooks/useResponsive';
 // components
@@ -11,6 +15,10 @@ import Iconify from '../components/iconify';
 import { LoginForm } from '../sections/auth/login';
 
 // ----------------------------------------------------------------------
+
+const Alert = React.forwardRef((props, ref) => {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const StyledRoot = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('md')]: {
@@ -41,10 +49,37 @@ const StyledContent = styled('div')(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function LoginPage() {
+  const [handleError, setHandleError] = useState([]);
+  const [open, setOpen] = useState(false);
+
   const mdUp = useResponsive('up', 'md');
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   return (
     <>
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={open}
+        autoHideDuration={1500}
+        onClose={handleClose}
+      >
+        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+          {(handleError[0]?.code.includes('form_password_incorrect') && 'Contraseña Incorrecta') ||
+            (handleError[0]?.code.includes('form_identifier_not_found') && 'Usuario Incorrecto')}
+        </Alert>
+      </Snackbar>
+
       <Helmet>
         <title> Login | Scholar URP </title>
       </Helmet>
@@ -98,7 +133,7 @@ export default function LoginPage() {
               </Typography>
             </Divider> */}
 
-            <LoginForm />
+            <LoginForm setHandleError={setHandleError} openSnack={handleClick} />
           </StyledContent>
         </Container>
       </StyledRoot>

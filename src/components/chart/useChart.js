@@ -29,7 +29,7 @@ export default function useChart(options) {
     colors: [
       theme.palette.primary.main,
       theme.palette.warning.main,
-      theme.palette.info.main,
+      /*  theme.palette.info.main, */
       theme.palette.error.main,
       theme.palette.success.main,
       theme.palette.warning.dark,

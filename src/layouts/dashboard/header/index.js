@@ -13,7 +13,6 @@ import AccountPopover from './AccountPopover';
 import LanguagePopover from './LanguagePopover';
 import NotificationsPopover from './NotificationsPopover';
 
-
 // ----------------------------------------------------------------------
 
 const NAV_WIDTH = 280;
@@ -70,8 +69,8 @@ export default function Header({ onOpenNav }) {
             sm: 1,
           }}
         >
-          <LanguagePopover />
-          <NotificationsPopover />
+          {/*  <LanguagePopover /> */}
+          {/* <NotificationsPopover /> */}
           {/*  <UserButton/> */}
           <AccountPopover />
         </Stack>
